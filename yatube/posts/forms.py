@@ -8,4 +8,5 @@ class PostForm(ModelForm):
         fields = (
             'group',
             'text',
+            'image',
         )
