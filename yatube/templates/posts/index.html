@@ -1,35 +1,53 @@
 ﻿{% extends 'base.html' %}
+{% load thumbnail %}
 
 {% block title %}
  Последние обновления на сайте
 {% endblock %} 
 
 {% block content %}
-    <p>
+    <br>
+    <p align = "center">
      Страницы: 
        {% for p in page_obj.paginator.page_range %}
          <a href="?page={{ p }}">{{ p }}</a>
        {% endfor %}
     </p>
+    <hr>
+<div class="container py-5">
   {% for post in page_obj %}
-    <ul>
-      <li>
-        Автор: <a href="{% url 'posts:profile' post.author.username %}">{{ post.author.get_full_name }}</a>
+  <div class="row">
+   <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <b>Автор:</b> <a href="{% url 'posts:profile' post.author.username %}">{{ post.author.get_full_name }}</a>
       </li>
-      <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
+      <li class="list-group-item">
+        <b>Дата публикации:</b> {{ post.pub_date|date:"d E Y" }}
       </li>
-    </ul>
-    <p>{{ post.text }}</p> 
-    {% if post.group %}   
-      <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+    {% if post.group %}  
+       <li class="list-group-item"> 
+          <b>Группа:</b> <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a>
+       </li>
     {% endif %} 
+    </ul>
+   </aside>
+ <article class="col-12 col-md-9">
+    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+       <img class="card-img my-2" src="{{ im.url }}">
+    {% endthumbnail %}
+    <p>{{ post.text }}</p>
+    <p align="right"><b><a href="{% url 'posts:post_detail' post.id %}">Подробнее >></a></b></p>
+   </article>
     {% if not forloop.last %}<hr>{% endif %}
+  </div> 
   {% endfor %}
-    <p>
+    <hr>
+    <p align = "center">
      Страницы: 
        {% for p in page_obj.paginator.page_range %}
          <a href="?page={{ p }}">{{ p }}</a>
        {% endfor %}
     </p>
+   </div>
 {% endblock %} 
