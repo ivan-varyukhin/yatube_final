@@ -1,5 +1,6 @@
 ﻿import shutil
 import tempfile
+from http import HTTPStatus
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django import forms
@@ -8,7 +9,7 @@ from django.conf import settings
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -255,3 +256,92 @@ class PaginatorViewsTest(TestCase):
             kwargs={'username': user.username}) + '?page=2'
         )
         self.assertEqual(len(response.context['page_obj']), 3)
+
+
+class CommentsViewsTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(
+            first_name='Имя',
+            last_name='Фамилия',
+            username='test_user',
+            email='test@test.ru'
+        )
+        cls.group = Group.objects.create(
+            title='Тестовое название группы',
+            description='Тестовое писание группы',
+            slug='test-slug'
+        )
+        cls.post = Post.objects.create(
+            text='Тест',
+            author=cls.user,
+            group=cls.group,
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = CommentsViewsTests.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_add_comment_for_guest(self):
+        post = CommentsViewsTests.post
+
+        response = self.guest_client.get(
+            reverse(
+                'posts:add_comment',
+                kwargs={
+                    'post_id': post.id
+                }
+            )
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.FOUND,
+            ('Неавторизированный пользователь'
+             ' не может оставлять комментарий')
+        )
+
+    def test_add_comment_for_auth_user(self):
+
+        post = CommentsViewsTests.post
+
+        comments_count = Comment.objects.filter(
+            post=post.id
+        ).count()
+        form_data = {
+            'text': 'Тестовый комментарий',
+        }
+
+        response = self.authorized_client.post(
+            reverse('posts:add_comment',
+                    kwargs={
+                        'post_id': post.id
+                    }
+                    ),
+            data=form_data,
+            follow=True
+        )
+        comments = Post.objects.filter(
+            id=post.id
+        ).values_list('comments', flat=True)
+        self.assertRedirects(
+            response,
+            reverse(
+                'posts:post_detail',
+                kwargs={
+                    'post_id': post.id
+                }
+            )
+        )
+        self.assertEqual(
+            comments.count(),
+            comments_count + 1
+        )
+        self.assertTrue(
+            Comment.objects.filter(
+                post=post.id,
+                text=form_data['text']
+            ).exists()
+        )
