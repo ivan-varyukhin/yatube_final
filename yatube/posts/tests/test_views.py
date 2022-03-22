@@ -3,6 +3,7 @@ import tempfile
 from http import HTTPStatus
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 from django import forms
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -298,9 +299,7 @@ class CommentsViewsTests(TestCase):
         )
         self.assertEqual(
             response.status_code,
-            HTTPStatus.FOUND,
-            ('Неавторизированный пользователь'
-             ' не может оставлять комментарий')
+            HTTPStatus.FOUND
         )
 
     def test_add_comment_for_auth_user(self):
@@ -345,3 +344,50 @@ class CommentsViewsTests(TestCase):
                 text=form_data['text']
             ).exists()
         )
+
+
+class CacheViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.user = User.objects.create(
+            first_name='Имя',
+            last_name='Фамилия',
+            username='test_user',
+            email='test@test.ru'
+        )
+        cls.group = Group.objects.create(
+            title='Тестовое название группы',
+            description='Тестовое писание группы',
+            slug='test-slug'
+        )
+        cls.post = Post.objects.create(
+            text='Тестовое сообщение',
+            group=cls.group,
+            author=cls.user
+        )
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
+
+    def test_cache_index(self):
+        response = CacheViewsTest.authorized_client.get(reverse('posts:index'))
+        posts = response.content
+
+        Post.objects.create(
+            text='Новое тестовое сообщение',
+            author=CacheViewsTest.user,
+        )
+        response_old = CacheViewsTest.authorized_client.get(
+            reverse('posts:index')
+        )
+        old_posts = response_old.content
+        self.assertEqual(
+            old_posts,
+            posts,
+            'Страница не кешируется'
+        )
+        cache.clear()
+        response_new = CacheViewsTest.authorized_client.get(reverse('posts:index'))
+        new_posts = response_new.content
+        self.assertNotEqual(old_posts, new_posts, 'Кеш не обновляется')
