@@ -10,7 +10,7 @@ from django.conf import settings
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, Comment
+from posts.models import Group, Post, Comment, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -70,7 +70,7 @@ class PostPagesTests(TestCase):
             post.text: post.text,
             post.author.get_full_name(): user.get_full_name(),
             post.group.title: group.title,
-            post.image: "posts/small.gif",
+            post.image: 'posts/small.gif',
         }
         for value, expected in post_test_dict.items():
             with self.subTest(value=value):
@@ -391,3 +391,76 @@ class CacheViewsTest(TestCase):
         response_new = CacheViewsTest.authorized_client.get(reverse('posts:index'))
         new_posts = response_new.content
         self.assertNotEqual(old_posts, new_posts, 'Кеш не обновляется')
+
+
+class FollowViewsTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.user = User.objects.create(
+            first_name='Имя',
+            last_name='Фамилия',
+            username='test_user',
+            email='test@test.ru'
+        )
+        cls.user_2 = User.objects.create(
+            username='test_user_2',
+        )
+        cls.user_3 = User.objects.create(
+            username='test_user_3',
+        )
+        cls.group = Group.objects.create(
+            title='Тестовое название группы',
+            description='Тестовое писание группы',
+            slug='test-slug'
+        )
+        cls.post = Post.objects.create(
+            text='Тестовое сообщение',
+            group=cls.group,
+            author=cls.user
+        )
+        cls.post_user_2 = Post.objects.create(
+            text='Тестовое сообщение 2',
+            author=cls.user_2,
+        )
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
+
+    def test_auth_user_follow(self):
+        user = FollowViewsTests.user
+        user_2 = FollowViewsTests.user_2
+
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+        )
+        self.assertEquals(Follow.objects.get(user=user).author, user_2)
+
+    def test_auth_user_unfollow(self):
+        user =  FollowViewsTests.user
+        user_2 =  FollowViewsTests.user_2
+
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+        )
+        self.authorized_client.get(
+            reverse('posts:profile_unfollow', kwargs={'username': user_2.username})
+        )
+        self.assertFalse(Follow.objects.filter(user=user).exists())
+
+    def test_new_post_in_following(self):
+        user_2 =  FollowViewsTests.user_2
+        user_3 =  FollowViewsTests.user_3
+        post =  FollowViewsTests.post_user_2
+
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        post_0 = response.context['page_obj'][0]
+        post_text_0 = post_0.text
+        self.assertEquals(post_text_0, post.text)
+
+        self.authorized_client.force_login(user_3)
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEquals(len(response.context['page_obj']), 0)

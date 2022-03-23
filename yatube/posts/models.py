@@ -83,3 +83,14 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:30]
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             related_name="follower")
+    author = models.ForeignKey(User,
+                               on_delete=models.SET_NULL,
+                               null=True,
+                               related_name="following")

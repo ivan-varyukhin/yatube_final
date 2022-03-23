@@ -2,7 +2,7 @@
 {% load thumbnail %}
 
 {% block title %}
- Последние обновления на сайте
+ Последние обновления избранных авторов
 {% endblock %} 
 
 {% block content %}
@@ -12,12 +12,10 @@
        {% for p in page_obj.paginator.page_range %}
          <a href="?page={{ p }}">{{ p }}</a>
        {% endfor %}
-     <hr>
     </p>
+    <hr>
 <div class="container py-5">
-{% include 'posts/includes/switcher.html' with index=True %}
- {% load cache %}
-  {% cache 20 index_page page %}
+{% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
   <div class="row">
    <aside class="col-12 col-md-3">
@@ -45,7 +43,6 @@
     {% if not forloop.last %}<hr>{% endif %}
   </div> 
   {% endfor %}
- {% endcache %}
     <hr>
     <p align = "center">
      Страницы: 
