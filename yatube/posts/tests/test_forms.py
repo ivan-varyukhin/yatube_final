@@ -9,10 +9,10 @@ from django.urls import reverse
 
 from posts.models import Group, Post
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-
 User = get_user_model()
 
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class FormsPostCreateTests(TestCase):

@@ -11,6 +11,7 @@ class PostForm(ModelForm):
             'image',
         )
 
+
 class CommentForm(ModelForm):
     class Meta:
         model = Comment

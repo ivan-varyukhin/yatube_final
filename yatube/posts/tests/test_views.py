@@ -34,12 +34,12 @@ class PostPagesTests(TestCase):
             slug='test-slug'
         )
         small_gif = (
-             b'\x47\x49\x46\x38\x39\x61\x02\x00'
-             b'\x01\x00\x80\x00\x00\x00\x00\x00'
-             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-             b'\x0A\x00\x3B'
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
         )
         cls.uploaded = SimpleUploadedFile(
             name='small.gif',
@@ -52,7 +52,6 @@ class PostPagesTests(TestCase):
             group=cls.group,
             image=cls.uploaded
         )
-
 
     @classmethod
     def tearDownClass(cls):
@@ -388,7 +387,9 @@ class CacheViewsTest(TestCase):
             'Страница не кешируется'
         )
         cache.clear()
-        response_new = CacheViewsTest.authorized_client.get(reverse('posts:index'))
+        response_new = CacheViewsTest.authorized_client.get(
+            reverse('posts:index')
+        )
         new_posts = response_new.content
         self.assertNotEqual(old_posts, new_posts, 'Кеш не обновляется')
 
@@ -432,29 +433,41 @@ class FollowViewsTests(TestCase):
         user_2 = FollowViewsTests.user_2
 
         self.authorized_client.get(
-            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': user_2.username}
+            )
         )
         self.assertEquals(Follow.objects.get(user=user).author, user_2)
 
     def test_auth_user_unfollow(self):
-        user =  FollowViewsTests.user
-        user_2 =  FollowViewsTests.user_2
+        user = FollowViewsTests.user
+        user_2 = FollowViewsTests.user_2
 
         self.authorized_client.get(
-            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': user_2.username}
+            )
         )
         self.authorized_client.get(
-            reverse('posts:profile_unfollow', kwargs={'username': user_2.username})
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': user_2.username}
+            )
         )
         self.assertFalse(Follow.objects.filter(user=user).exists())
 
     def test_new_post_in_following(self):
-        user_2 =  FollowViewsTests.user_2
-        user_3 =  FollowViewsTests.user_3
-        post =  FollowViewsTests.post_user_2
+        user_2 = FollowViewsTests.user_2
+        user_3 = FollowViewsTests.user_3
+        post = FollowViewsTests.post_user_2
 
         self.authorized_client.get(
-            reverse('posts:profile_follow', kwargs={'username': user_2.username})
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': user_2.username}
+            )
         )
         response = self.authorized_client.get(reverse('posts:follow_index'))
         post_0 = response.context['page_obj'][0]

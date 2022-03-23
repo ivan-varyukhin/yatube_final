@@ -8,7 +8,7 @@ from django.conf import settings
 
 from posts.models import Post, Group, User, Follow
 
-from posts.forms import PostForm,  CommentForm
+from posts.forms import PostForm, CommentForm
 
 
 def index(request):
@@ -128,6 +128,7 @@ def post_edit(request, post_id):
     }
     return render(request, "posts/create_post.html", context)
 
+
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -138,6 +139,7 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
+
 
 @login_required
 def follow_index(request):
@@ -153,6 +155,7 @@ def follow_index(request):
     }
 
     return render(request, 'posts/follow.html', context)
+
 
 @login_required
 def profile_follow(request, username):
