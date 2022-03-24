@@ -35,13 +35,10 @@ def profile(request, username):
     profile = get_object_or_404(User, username=username)
     post_list = profile.posts.all()
     followers_count = profile.following.all().count()
-    following = (
-        'request.user.is_authenticated and '
-        'Follow.objects.filter('
-        '    user=request.user,'
-        '    author=profile'
-        ').exists()'
-    )
+    following = request.user.is_authenticated and Follow.objects.filter(
+            user=request.user,
+            author=profile
+        ).exists()
     paginator = Paginator(post_list, settings.POSTS_LIMIT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -145,16 +142,7 @@ def profile_follow(request, username):
             'posts:profile',
             username=username
         )
-    follower = Follow.objects.filter(
-        user=request.user,
-        author=author
-    ).exists()
-    if follower is True:
-        return redirect(
-            'posts:profile',
-            username=username
-        )
-    Follow.objects.create(user=request.user, author=author)
+    follower, created = Follow.objects.get_or_create(user=request.user, author=author)
     return redirect(
         'posts:profile',
         username=username

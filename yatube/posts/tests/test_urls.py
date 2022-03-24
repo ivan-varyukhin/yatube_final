@@ -1,4 +1,5 @@
-﻿from django.contrib.auth import get_user_model
+﻿from http import HTTPStatus
+from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
 from posts.models import Group, Post
@@ -12,7 +13,7 @@ class StaticURLTests(TestCase):
 
     def test_homepage(self):
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
 class PostURLTests(TestCase):

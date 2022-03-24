@@ -7,7 +7,7 @@ from django.conf import settings
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
 
 User = get_user_model()
 
@@ -109,3 +109,28 @@ class FormsPostCreateTests(TestCase):
         post.refresh_from_db()
         self.assertEquals(post.text, 'Тест 2')
         self.assertEquals(post.group, new_group)
+
+    def test_comment_form(self):
+        post = Post.objects.create(
+            text='Тест ',
+            author=FormsPostCreateTests.user,
+            group=FormsPostCreateTests.group,
+        )
+        comments_count = Comment.objects.filter(post=post.pk).count()
+        form_data = {'text': 'Тестовый комментарий',}
+        response = self.authorized_client.post(
+            reverse('posts:add_comment',
+                kwargs={'post_id': post.pk}
+            ),
+            data=form_data,
+            follow=True
+        )
+        comments = Post.objects.filter(id=post.pk).values_list('comments', flat=True)
+        self.assertRedirects(response, reverse('posts:post_detail', kwargs={'post_id': post.pk}))
+        self.assertEqual(comments.count(), comments_count + 1)
+        self.assertTrue(
+            Comment.objects.filter(
+                post=post.pk,
+                text=form_data['text']
+            ).exists()
+        )

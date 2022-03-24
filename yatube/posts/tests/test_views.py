@@ -444,12 +444,8 @@ class FollowViewsTests(TestCase):
         user = FollowViewsTests.user
         user_2 = FollowViewsTests.user_2
 
-        self.authorized_client.get(
-            reverse(
-                'posts:profile_follow',
-                kwargs={'username': user_2.username}
-            )
-        )
+        test_follow = Follow.objects.create(user=user_2, author=user)
+
         self.authorized_client.get(
             reverse(
                 'posts:profile_unfollow',
