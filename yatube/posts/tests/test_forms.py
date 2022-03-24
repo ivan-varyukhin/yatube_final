@@ -119,7 +119,8 @@ class FormsPostCreateTests(TestCase):
         comments_count = Comment.objects.filter(post=post.pk).count()
         form_data = {'text': 'Тестовый комментарий', }
         response = self.authorized_client.post(
-            reverse('posts:add_comment',
+            reverse(
+                'posts:add_comment',
                 kwargs={'post_id': post.pk}
             ),
             data=form_data,
