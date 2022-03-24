@@ -28,7 +28,7 @@ class PostURLTests(TestCase):
         )
         cls.user_2 = User.objects.create(
             username='test_user_2'
-          )
+        )
         cls.group = Group.objects.create(
             title='Тестовое название группы',
             description='Тестовое писание группы',
@@ -69,7 +69,6 @@ class PostURLTests(TestCase):
     def test_url(self):
         group = PostURLTests.group
         user = PostURLTests.user
-        user_2 = PostURLTests.user_2
         post = PostURLTests.post
 
         response_index = self.guest_client.get('/')
@@ -81,8 +80,12 @@ class PostURLTests(TestCase):
         )
 
         response_follow_index = self.authorized_client_2.get('/follow/')
-        response_follow = self.authorized_client_2.get(f'/profile/{user.username}/follow/')
-        response_unfollow = self.authorized_client_2.get(f'/profile/{user.username}/unfollow/')
+        response_follow = self.authorized_client_2.get(
+            f'/profile/{user.username}/follow/'
+        )
+        response_unfollow = self.authorized_client_2.get(
+            f'/profile/{user.username}/unfollow/'
+        )
 
         response_404 = self.guest_client.get('/notexistant_page/')
 

@@ -7,6 +7,7 @@ admin.site.site_header = 'Администрирование сайта'
 admin.site.site_title = 'Управление Yatube'
 admin.site.index_title = 'Управление Yatube'
 
+
 class PostAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -32,6 +33,7 @@ class GroupAdmin(admin.ModelAdmin):
     search_fields = ('title',)
     prepopulated_fields = {"slug": ("title",)}
     empty_value_display = '-пусто-'
+
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("author", "post", "text", "created",)

@@ -117,7 +117,7 @@ class FormsPostCreateTests(TestCase):
             group=FormsPostCreateTests.group,
         )
         comments_count = Comment.objects.filter(post=post.pk).count()
-        form_data = {'text': 'Тестовый комментарий',}
+        form_data = {'text': 'Тестовый комментарий', }
         response = self.authorized_client.post(
             reverse('posts:add_comment',
                 kwargs={'post_id': post.pk}
@@ -125,8 +125,12 @@ class FormsPostCreateTests(TestCase):
             data=form_data,
             follow=True
         )
-        comments = Post.objects.filter(id=post.pk).values_list('comments', flat=True)
-        self.assertRedirects(response, reverse('posts:post_detail', kwargs={'post_id': post.pk}))
+        comments = Post.objects.filter(
+            id=post.pk
+        ).values_list('comments', flat=True)
+        self.assertRedirects(
+            response, reverse('posts:post_detail', kwargs={'post_id': post.pk})
+        )
         self.assertEqual(comments.count(), comments_count + 1)
         self.assertTrue(
             Comment.objects.filter(

@@ -444,7 +444,7 @@ class FollowViewsTests(TestCase):
         user = FollowViewsTests.user
         user_2 = FollowViewsTests.user_2
 
-        test_follow = Follow.objects.create(user=user_2, author=user)
+        Follow.objects.create(user=user_2, author=user)
 
         self.authorized_client.get(
             reverse(
