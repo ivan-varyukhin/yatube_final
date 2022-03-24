@@ -26,13 +26,16 @@ class PostURLTests(TestCase):
             username='test_user',
             email='test@test.ru'
         )
+        cls.user_2 = User.objects.create(
+            username='test_user_2'
+          )
         cls.group = Group.objects.create(
             title='Тестовое название группы',
             description='Тестовое писание группы',
             slug='test-slug'
         )
         cls.post = Post.objects.create(
-            text='Тест ' * 20,
+            text='Тест',
             author=cls.user,
             group=cls.group,
         )
@@ -42,6 +45,9 @@ class PostURLTests(TestCase):
         self.user = PostURLTests.user
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.user_2 = PostURLTests.user_2
+        self.authorized_client_2 = Client()
+        self.authorized_client_2.force_login(self.user_2)
 
     def test_urls_uses_correct_template(self):
         user = PostURLTests.user
@@ -63,6 +69,7 @@ class PostURLTests(TestCase):
     def test_url(self):
         group = PostURLTests.group
         user = PostURLTests.user
+        user_2 = PostURLTests.user_2
         post = PostURLTests.post
 
         response_index = self.guest_client.get('/')
@@ -73,6 +80,10 @@ class PostURLTests(TestCase):
             f'/posts/{post.id}/edit/'
         )
 
+        response_follow_index = self.authorized_client_2.get('/follow/')
+        response_follow = self.authorized_client_2.get(f'/profile/{user.username}/follow/')
+        response_unfollow = self.authorized_client_2.get(f'/profile/{user.username}/unfollow/')
+
         response_404 = self.guest_client.get('/notexistant_page/')
 
         test_dict = {
@@ -81,6 +92,11 @@ class PostURLTests(TestCase):
             response_profile.status_code: 200,
             response_post.status_code: 200,
             response_post_edit.status_code: 200,
+
+            response_follow_index.status_code: 200,
+            response_follow.status_code: 302,
+            response_unfollow.status_code: 302,
+
             response_404.status_code: 404,
         }
 
