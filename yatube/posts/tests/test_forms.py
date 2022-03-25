@@ -133,7 +133,6 @@ class CommentsFormTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-
     def test_comment_form(self):
         post = Post.objects.create(
             text='Тест ',

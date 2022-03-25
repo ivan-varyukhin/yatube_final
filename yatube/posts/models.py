@@ -127,4 +127,4 @@ class Follow(models.Model):
         )
 
     def __str__(self):
-        return self.user.username+' follow '+self.author.username
+        return self.user.username + ' follow ' + self.author.username
