@@ -141,7 +141,7 @@ def profile_follow(request, username):
             'posts:profile',
             username=username
         )
-    follower, created = Follow.objects.get_or_create(
+    Follow.objects.get_or_create(
         user=request.user, author=author
     )
     return redirect(

@@ -31,19 +31,19 @@ class GroupAdmin(admin.ModelAdmin):
     )
     list_editable = ('slug',)
     search_fields = ('title',)
-    prepopulated_fields = {"slug": ("title",)}
+    prepopulated_fields = {'slug': ('title',)}
     empty_value_display = '-пусто-'
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ("author", "post", "text", "created",)
-    search_fields = ("post",)
-    list_filter = ("author", "created",)
+    list_display = ('author', 'post', 'text', 'created',)
+    search_fields = ('post',)
+    list_filter = ('author', 'created',)
 
 
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ("author", "user",)
-    list_filter = ("author", "user",)
+    list_display = ('author', 'user',)
+    list_filter = ('author', 'user',)
 
 
 admin.site.register(Post, PostAdmin)

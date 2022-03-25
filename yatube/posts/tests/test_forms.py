@@ -110,11 +110,35 @@ class FormsPostCreateTests(TestCase):
         self.assertEquals(post.text, 'Тест 2')
         self.assertEquals(post.group, new_group)
 
+
+class CommentsFormTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create(
+            first_name='Имя',
+            last_name='Фамилия',
+            username='test_user',
+            email='test@test.ru'
+        )
+        cls.group = Group.objects.create(
+            title='Тестовое название группы',
+            description='Тестовое писание группы',
+            slug='test-slug'
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = CommentsFormTests.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+
     def test_comment_form(self):
         post = Post.objects.create(
             text='Тест ',
-            author=FormsPostCreateTests.user,
-            group=FormsPostCreateTests.group,
+            author=CommentsFormTests.user,
+            group=CommentsFormTests.group,
         )
         comments_count = Comment.objects.filter(post=post.pk).count()
         form_data = {'text': 'Тестовый комментарий', }
@@ -128,7 +152,7 @@ class FormsPostCreateTests(TestCase):
         )
         comments = Post.objects.filter(
             id=post.pk
-        ).values_list('comments', flat=True)
+        ).all()
         self.assertRedirects(
             response, reverse('posts:post_detail', kwargs={'post_id': post.pk})
         )

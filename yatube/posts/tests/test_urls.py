@@ -90,17 +90,17 @@ class PostURLTests(TestCase):
         response_404 = self.guest_client.get('/notexistant_page/')
 
         test_dict = {
-            response_index.status_code: 200,
-            response_group.status_code: 200,
-            response_profile.status_code: 200,
-            response_post.status_code: 200,
-            response_post_edit.status_code: 200,
+            response_index.status_code: HTTPStatus.OK,
+            response_group.status_code: HTTPStatus.OK,
+            response_profile.status_code: HTTPStatus.OK,
+            response_post.status_code: HTTPStatus.OK,
+            response_post_edit.status_code: HTTPStatus.OK,
 
-            response_follow_index.status_code: 200,
-            response_follow.status_code: 302,
-            response_unfollow.status_code: 302,
+            response_follow_index.status_code: HTTPStatus.OK,
+            response_follow.status_code: HTTPStatus.FOUND,
+            response_unfollow.status_code: HTTPStatus.FOUND,
 
-            response_404.status_code: 404,
+            response_404.status_code: HTTPStatus.NOT_FOUND,
         }
 
         for value, expected in test_dict.items():
